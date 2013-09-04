@@ -25,20 +25,20 @@ pub struct Actor {
 }
 
 /**
- * Actors Trait
+ * Actors Implementation
  *
  * This trait defines some default methods
  * like start, stop, receive.
  */
-impl<Send> Actor {
+impl Actor {
     
-    pub fn new(&self, port: Port<~str>, chan: SharedChan<~str>) -> Actor {
+    pub fn new(port: Port<~str>, chan: SharedChan<~str>) -> Actor {
         Actor{port: port, chan: chan}
     }
 
     pub fn start(&self) {
         //TODO: Put in a task
-        //self.receive();
+        self.receive();
     }
 
     pub fn receive(&self) {
