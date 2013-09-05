@@ -4,4 +4,5 @@
 *.dSYM
 bin
 lib
+build
 gitgnore

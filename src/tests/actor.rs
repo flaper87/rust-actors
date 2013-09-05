@@ -1,11 +1,19 @@
 extern mod actors;
 
-use actors::actor::{Actor};
-use std::comm::{stream, Port, SharedChan};
+use actors::actor::{Actor, ActorRef};
+use std::comm::{stream};
+use std::task;
 
 #[test]
 fn test_actor() {
     let (port, chan) = stream::<~str>();
-    let chan = SharedChan::new(chan);
-    let actor = Actor::new(port, chan);
+    let actor_ref = ActorRef::new(chan);
+
+    let actor = Actor::new(port, actor_ref.get_channel());
+    
+    do task::spawn {
+        actor.start();
+    }
+
+    actor_ref.stop();
 }

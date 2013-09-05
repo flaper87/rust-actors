@@ -19,7 +19,6 @@ use std::comm::{Port, SharedChan};
 pub struct Actor {
 
     priv port: Port<~str>,
-
     priv chan: SharedChan<~str>
 
 }
@@ -37,7 +36,6 @@ impl Actor {
     }
 
     pub fn start(&self) {
-        //TODO: Put in a task
         self.receive();
     }
 
@@ -53,5 +51,25 @@ impl Actor {
         }
     }
 
-    pub fn stop(&self) {}
+    pub fn stop(&self) {
+        self.chan.send(~"stop");
+    }
+}
+
+ 
+pub struct ActorRef { c: SharedChan<~str> }
+
+impl ActorRef {
+    
+    pub fn new(c: Chan<~str>) -> ActorRef {
+        ActorRef{c: SharedChan::new(c)}
+    }
+
+    pub fn get_channel(&self) -> SharedChan<~str> {
+        self.c.clone()
+    }
+
+    pub fn stop(&self) {
+        self.c.send(~"stop");
+    }
 }

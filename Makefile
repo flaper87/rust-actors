@@ -21,14 +21,14 @@ BUILD_DIR      = $(ROOT_DIR)/lib
 
 $(TARGET):
 	@echo "Building $(TARGET)"
-	@mkdir -p $(BUILD_DIR)
-	@rustc $(SRC_DIR)/$(SRC_CRATE) --lib --out-dir=$(BUILD_DIR)
+	@rustpkg install actors
 	@echo "Success! \o/"
 
 all: $(TARGET)
 
 test: $(TARGET)
-	@rustc $(SRC_TESTS)/actor.rs -L $(BUILD_DIR) --test -o actors-test
+	@rustc $(SRC_TESTS)/actor.rs -L $(BUILD_DIR) --test -o $(BUILD_DIR)/actors-test
+	@$(BUILD_DIR)/actors-test
 
 clean:
 	rm -R -f $(BUILD_DIR)
