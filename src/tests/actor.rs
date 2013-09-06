@@ -5,6 +5,7 @@ use std::comm::{stream};
 use std::task;
 
 #[test]
+#[should_fail]
 fn test_actor() {
     let (port, chan) = stream::<~str>();
     let actor_ref = ActorRef::new(chan);
@@ -13,7 +14,7 @@ fn test_actor() {
     
     do task::spawn {
         actor.start();
-    }
+    };
 
     actor_ref.stop();
 }
