@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 
+use std::task;
 use std::comm::{Port, SharedChan};
 
 pub struct Actor {
@@ -26,50 +27,62 @@ pub struct Actor {
 /**
  * Actors Implementation
  *
- * This trait defines some default methods
- * like start, stop, receive.
+ * Implements the main functions for Actor.
+ *
+ * An actor consists in a Port and a SharedChan, both
+ * accepting / receiving ~str. This pipes will be used
+ * for 
  */
 impl Actor {
     
-    pub fn new(port: Port<~str>, chan: SharedChan<~str>) -> Actor {
-        Actor{port: port, chan: chan}
+    pub fn new(port: Port<~str>, chan: Chan<~str>) -> ActorRef {
+        let shared = SharedChan::new(chan);
+        let actor = Actor{port: port, chan: shared};
+        ActorRef::new(actor)
     }
 
-    pub fn start(&self) {
-        self.receive();
-    }
+    fn start(&self) { println("Starting Actor") }
 
-    pub fn receive(&self) {
-        loop {
-            let msg = self.port.recv();
+    fn listen(self) {
+        do task::spawn {
+            loop {
+                let msg = self.port.recv();
 
-            match msg {
-                ~"execute" => println("processing message"),
-                ~"stop" => fail!("Task was stopped by callee."),
-                _     => println("something else")
+                match msg {
+                    ~"start" => self.start(),
+                    ~"execute" => println("processing message"),
+                    ~"stop" => self.stop(),
+                    _     => println("something else")
+                }
             }
         }
     }
 
-    pub fn stop(&self) {
-        self.chan.send(~"stop");
+    fn stop(&self) {
+        println("Stopping Actor");
+        fail!("Task was stopped by callee.");
     }
 }
 
- 
-pub struct ActorRef { c: SharedChan<~str> }
+
+pub struct ActorRef { 
+    priv chan: SharedChan<~str>,
+}
 
 impl ActorRef {
     
-    pub fn new(c: Chan<~str>) -> ActorRef {
-        ActorRef{c: SharedChan::new(c)}
+    fn new(actor: Actor) -> ActorRef {
+        let chan = actor.chan.clone();
+        actor.listen();
+        ActorRef{chan: chan}
     }
 
-    pub fn get_channel(&self) -> SharedChan<~str> {
-        self.c.clone()
+
+    pub fn start(&self) {
+        self.chan.send(~"start");
     }
 
     pub fn stop(&self) {
-        self.c.send(~"stop");
+        self.chan.send(~"stop");
     }
 }
